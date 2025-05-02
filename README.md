@@ -6,7 +6,7 @@ Application web permettant de gérer des articles musicaux et d'interagir avec l
 
 ```bash
 # Cloner le projet
-git clone [votre-url-github]
+git clone https://github.com/XavAsh/music-blog.git
 cd music-blog
 
 # Installer les dépendances
