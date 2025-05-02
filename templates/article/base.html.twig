@@ -1,0 +1,21 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Articles{% endblock %}
+
+{% block body %}
+    <h1>Articles</h1>
+    <div class="row">
+        {% for article in articles %}
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ article.title }}</h5>
+                        <p class="card-text">{{ article.content|slice(0, 100) }}...</p>
+                        <p class="text-muted">By {{ article.author.email }}</p>
+                        <a href="{{ path('app_article_show', {id: article.id}) }}" class="btn btn-primary">Read more</a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}

@@ -1,0 +1,89 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Spotify Artist Search{% endblock %}
+
+{% block body %}
+    <div class="row mb-4">
+        <div class="col-md-6 offset-md-3">
+            <h1 class="mb-4">Search Spotify Artists</h1>
+            <form id="searchForm" class="d-flex gap-2">
+                <input type="text" id="searchQuery" class="form-control" placeholder="Search for an artist...">
+                <button type="submit" class="btn btn-primary">Search</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="results" class="row">
+    </div>
+
+    <template id="artist-template">
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <img src="" class="card-img-top artist-image" alt="">
+                <div class="card-body">
+                    <h5 class="card-title artist-name"></h5>
+                    <p class="card-text genres"></p>
+                    <p class="text-muted followers"></p>
+                    <div class="d-flex gap-2">
+                        <a href="#" class="btn btn-primary spotify-link">View on Spotify</a>
+                        <button class="btn btn-secondary generate-pdf">Generate PDF</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <script>
+        document.getElementById('searchForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const query = document.getElementById('searchQuery').value;
+            const response = await fetch(`/api/spotify/search?q=${encodeURIComponent(query)}`, {
+                headers: {
+                    'Authorization': 'Bearer ' + localStorage.getItem('token')
+                }
+            });
+            const data = await response.json();
+            
+            const results = document.getElementById('results');
+            results.innerHTML = '';
+            const template = document.getElementById('artist-template');
+
+            data.artists.items.forEach(artist => {
+                const clone = template.content.cloneNode(true);
+                clone.querySelector('.artist-image').src = artist.images[0]?.url || '/placeholder.jpg';
+                clone.querySelector('.artist-name').textContent = artist.name;
+                clone.querySelector('.genres').textContent = artist.genres.join(', ');
+                clone.querySelector('.followers').textContent = `${artist.followers.total.toLocaleString()} followers`;
+                clone.querySelector('.spotify-link').href = artist.external_urls.spotify;
+                
+                const pdfButton = clone.querySelector('.generate-pdf');
+                pdfButton.addEventListener('click', () => generatePdf(artist.id));
+                
+                results.appendChild(clone);
+            });
+        });
+
+                                  async function generatePdf(artistId) {
+                            try {
+                                const response = await fetch(`/api/spotify/artists/${artistId}/pdf`, {
+                                    method: 'POST',
+                                    headers: {
+                                        'Authorization': 'Bearer ' + localStorage.getItem('token')
+                                    }
+                                });
+                                const data = await response.json();
+                                
+                                if (data.pdf_url) {
+                                    // Construct the full URL using window.location.origin
+                                    const fullUrl = window.location.origin + '/pdfs/spotify_artist_' + artistId + '.pdf';
+                                    window.open(fullUrl, '_blank');
+                                } else {
+                                    alert('PDF generation failed. Please try again.');
+                                }
+                            } catch (error) {
+                                console.error('Error generating PDF:', error);
+                                alert('Error generating PDF. Please try again.');
+                            }
+                        }
+    </script>
+{% endblock %}

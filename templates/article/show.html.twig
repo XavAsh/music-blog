@@ -1,0 +1,77 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ article.title }}{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-body">
+            <h1 class="card-title">{{ article.title }}</h1>
+            
+            <div class="text-muted mb-4">
+                <small>
+                    Created on {{ article.createdAt|date('F d, Y') }} 
+                    {% if article.updatedAt != article.createdAt %}
+                        • Updated on {{ article.updatedAt|date('F d, Y') }}
+                    {% endif %}
+                    {% if article.author %}
+                        • By {{ article.author.email }}
+                    {% endif %}
+                </small>
+            </div>
+
+            <div class="article-content mb-4">
+                {{ article.content|nl2br }}
+            </div>
+
+            {% for message in app.flashes('success') %}
+                <div class="alert alert-success">
+                    {{ message }}
+                </div>
+            {% endfor %}
+
+            <div class="btn-group">
+                <a href="{{ path('app_article_index') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to list
+                </a>
+                
+                {% if is_granted('ROLE_USER') %}
+                                       <a href="{{ path('app_article_pdf', {'id': article.id}) }}" class="btn btn-secondary" target="_blank">
+                        <i class="fas fa-file-pdf"></i> View PDF
+                    </a>
+                {% endif %}
+
+                {% if is_granted('ROLE_USER') %}
+                    <a href="{{ path('app_article_edit', {'id': article.id}) }}" class="btn btn-primary">
+                        <i class="fas fa-edit"></i> Edit
+                    </a>
+                {% endif %}
+
+                {% if is_granted('ROLE_ADMIN') %}
+                    {{ include('article/_delete_form.html.twig') }}
+                {% endif %}
+            </div>
+
+            {% if is_granted('ROLE_USER') %}
+                <div class="comments-section mt-4">
+                    <h3>Comments</h3>
+                    {% if article.comments|length > 0 %}
+                        {% for comment in article.comments %}
+                            <div class="card mb-2">
+                                <div class="card-body">
+                                    <p class="card-text">{{ comment.content }}</p>
+                                    <small class="text-muted">
+                                        By {{ comment.user.email }} on {{ comment.createdAt|date('F d, Y H:i') }}
+                                    </small>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted">No comments yet.</p>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

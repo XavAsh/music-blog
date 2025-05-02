@@ -1,0 +1,59 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ artist.name }} - Spotify Artist{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="row g-0">
+            <div class="col-md-4">
+                <img src="{{ artist.images[0].url }}" class="img-fluid rounded-start" alt="{{ artist.name }}">
+            </div>
+            <div class="col-md-8">
+                <div class="card-body">
+                    <h1 class="card-title">{{ artist.name }}</h1>
+                    <p class="card-text">
+                        <strong>Genres:</strong> {{ artist.genres|join(', ') }}<br>
+                        <strong>Followers:</strong> {{ artist.followers.total|number_format }}<br>
+                        <strong>Popularity:</strong> {{ artist.popularity }}/100
+                    </p>
+                    
+                    <div class="btn-group">
+                        <a href="{{ artist.external_urls.spotify }}" class="btn btn-success" target="_blank">
+                            <i class="fab fa-spotify"></i> Open in Spotify
+                        </a>
+                        <a href="{{ path('app_spotify_artist_pdf', {'id': artist.id}) }}" class="btn btn-secondary" target="_blank">
+                            <i class="fas fa-file-pdf"></i> Generate PDF
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mt-4">
+        <div class="card-body">
+            <h2>Top Tracks</h2>
+            <div class="list-group">
+                {% for track in topTracks %}
+                    <div class="list-group-item">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="mb-1">{{ track.name }}</h5>
+                                <small class="text-muted">
+                                    Album: {{ track.album.name }} • 
+                                    Duration: {{ (track.duration_ms/1000)|round }} seconds
+                                </small>
+                            </div>
+                            <audio controls>
+                                <source src="{{ track.preview_url }}" type="audio/mpeg">
+                                Your browser does not support the audio element.
+                            </audio>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
